@@ -1,13 +1,19 @@
-from xml.dom.minidom import parseString
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+$Id$
+"""
+from __future__ import unicode_literals, print_function, absolute_import, division
+__docformat__ = "restructuredtext en"
 
+from xml.dom.minidom import parseString
 
 OMS = 'OMS'
 OMA = 'OMA'
 OMV = 'OMV'
 OMI = 'OMI'
-OMOBJ = 'OMOBJ'
 OMF = 'OMF'
-
+OMOBJ = 'OMOBJ'
 
 def binaryOperator(op, arg1, arg2):
 	return '%s %s %s' % (arg1, op, arg2)
@@ -16,19 +22,19 @@ def unaryOperator(op, arg1):
 	return '%s%s' % (op, arg1)
 
 def latexMacro(macro, *args):
-	result = '%s' % macro
+	result = ['%s' % macro]
 
 	for arg in args:
-		result += '{%s}' % arg
+		result.append('{%s}' % arg)
 
-	return result
+	return ''.join(result)
 
 def sqrt(arg1, arg2):
-	result = '\\sqrt'
+	result = ['\\sqrt']
 	if arg2 != '2':
-		result += '[%s]'% arg2
-	result += '{%s}' % arg1
-	return result
+		result.append('[%s]' % arg2)
+	result.append('{%s}' % arg1)
+	return ''.join(result)
 
 def power(num, pow):
 	return '%s^{%s}' % (num, pow)
@@ -57,9 +63,8 @@ class OpenMath2Latex(object):
 		omobj = dom.firstChild
 
 		if omobj.localName != OMOBJ:
-			print 'Expected %s but found %s.  Are you sure this is open math' % (OMOBJ, omobj.localName)
+			print('Expected %s but found %s.  Are you sure this is open math' % (OMOBJ, omobj.localName))
 			return '\\Unknown{%s}' % (omobj)
-
 
 		oma = self.getChild(omobj, OMA)
 		handler = self.handleOMA
@@ -68,7 +73,7 @@ class OpenMath2Latex(object):
 				handler = getattr( self, 'handle' + omobj.childNodes[0].localName )
 				oma = omobj.childNodes[0]
 			else:
-				print 'Expected %s but found %s' % (OMA, getattr( oma, 'localName' ))
+				print('Expected %s but found %s' % (OMA, getattr( oma, 'localName' )))
 				return '\\Unknown{%s}' % (oma)
 
 		return '$%s$' % handler(oma)
@@ -106,22 +111,18 @@ class OpenMath2Latex(object):
 
 		for child in children:
 
-
 			if child.localName == OMS:
 
 				cdname, opname = self.handleOMS(child)
-
 				cd = self.contentDicts[cdname]
 
 				content = None
-
 				if cd:
 					content = cd[opname]
 
 				if content == None:
-					print 'Unknown content for %s:%s' % (cdname, opname)
+					print('Unknown content for %s:%s' % (cdname, opname))
 					return '\\Unknowncontent{%s}{%s}' % (cdname, opname)
-
 
 				if isinstance(content, basestring):
 					possibleArgs.append(content)
@@ -146,7 +147,7 @@ class OpenMath2Latex(object):
 				continue
 
 		if not translator:
-			print 'No operator found'
+			print('No operator found')
 			return '\\NoOperatorFound{%s}' % (node)
 
 		translatorArgs = []
