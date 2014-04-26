@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-$Id$
+.. $Id$
 """
 from __future__ import unicode_literals, print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
+
+logger = __import__('logging').getLogger(__name__)
 
 from xml.dom.minidom import parseString
 
@@ -36,34 +38,37 @@ def sqrt(arg1, arg2):
 	result.append('{%s}' % arg1)
 	return ''.join(result)
 
-def power(num, pow):
-	return '%s^{%s}' % (num, pow)
+def power(x, y):
+	return '%s^{%s}' % (x, y)
 
 arith1 = { \
-'plus' : [binaryOperator, '+', '#1', '#2'],	\
-'unary_minus': [unaryOperator, '-', '#1'], \
-'times' : [binaryOperator, '*', '#1', '#2'],	\
-'power': [power,'#1', '#2'], \
-'divide': [latexMacro, '\\frac', '#1', '#2'],\
-'root' : [sqrt, '#1','#2' ],\
-'minus' : [binaryOperator, '-', '#1', '#2'] \
+	'plus' : [binaryOperator, '+', '#1', '#2'], 	\
+	'unary_minus': [unaryOperator, '-', '#1'], 		\
+	'times' : [binaryOperator, '*', '#1', '#2'], 	\
+	'power': [power, '#1', '#2'], 					\
+	'divide': [latexMacro, '\\frac', '#1', '#2'], 	\
+	'root' : [sqrt, '#1', '#2' ], \
+	'minus' : [binaryOperator, '-', '#1', '#2']		\
 }\
 
 nums1 = {'pi' : '\\pi'}
 
 class OpenMath2Latex(object):
+
 	contentDicts = {}
 
 	def __init__(self):
 		self.contentDicts['arith1'] = arith1
 		self.contentDicts['nums1'] = nums1
+
 	def translate(self, openMathXML):
 		dom = parseString(openMathXML)
 
 		omobj = dom.firstChild
 
 		if omobj.localName != OMOBJ:
-			print('Expected %s but found %s.  Are you sure this is open math' % (OMOBJ, omobj.localName))
+			print('Expected %s but found %s.  Are you sure this is open math' % \
+				  (OMOBJ, omobj.localName))
 			return '\\Unknown{%s}' % (omobj)
 
 		oma = self.getChild(omobj, OMA)
@@ -152,12 +157,11 @@ class OpenMath2Latex(object):
 
 		translatorArgs = []
 
-		if args:
-			for arg in args:
-				if arg[0] == '#':
-					translatorArgs.append(possibleArgs.pop(0))
-				else:
-					translatorArgs.append(arg)
+		for arg in args or ():
+			if arg[0] == '#':
+				translatorArgs.append(possibleArgs.pop(0))
+			else:
+				translatorArgs.append(arg)
 
 		return self.executeTranslator(translator, translatorArgs)
 
