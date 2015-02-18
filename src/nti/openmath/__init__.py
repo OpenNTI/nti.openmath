@@ -3,6 +3,7 @@
 """
 .. $Id$
 """
+
 from __future__ import unicode_literals, print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
@@ -25,10 +26,8 @@ def unaryOperator(op, arg1):
 
 def latexMacro(macro, *args):
 	result = ['%s' % macro]
-
 	for arg in args:
 		result.append('{%s}' % arg)
-
 	return ''.join(result)
 
 def sqrt(arg1, arg2):
@@ -147,7 +146,6 @@ class OpenMath2Latex(object):
 
 			elif child.localName == OMF:
 				possibleArgs.append(self.handleOMF(child))
-
 			else:
 				continue
 
