@@ -23,7 +23,7 @@ setup(
 	description = "Support for parsing openmath XML",
 	long_description = codecs.open('README.rst', encoding='utf-8').read(),
 	license = 'Proprietary',
-	keywords = 'pyramid preference',
+	keywords = 'Math parsing',
 	classifiers = [
 		'Intended Audience :: Developers',
 		'Natural Language :: English',
@@ -42,5 +42,11 @@ setup(
 	install_requires=[
 		'setuptools',
 	],
-	entry_points=entry_points
+	entry_points=entry_points,
+	extras_require={
+		'test': TESTS_REQUIRE,
+	},
+	dependency_links=[
+		'git+https://github.com/NextThought/nti.nose_traceback_info.git#egg=nti.nose_traceback_info'
+	],
 )

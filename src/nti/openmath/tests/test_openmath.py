@@ -80,6 +80,3 @@ class TestAssessment(unittest.TestCase):
 		finally:
 			xml.close()
 		return result
-
-if __name__ == '__main__':
-	unittest.main()
