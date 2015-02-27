@@ -12,7 +12,8 @@ TESTS_REQUIRE = [
 	'nose-timer',
 	'nose-progressive',
 	'nose2[coverage_plugin]',
-	'pyhamcrest'
+	'pyhamcrest',
+	'nose_traceback_info'
 ]
 
 setup(
