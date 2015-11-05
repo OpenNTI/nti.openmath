@@ -66,18 +66,18 @@ class OpenMath2Latex(object):
 		omobj = dom.firstChild
 
 		if omobj.localName != OMOBJ:
-			print('Expected %s but found %s.  Are you sure this is open math' % \
-				  (OMOBJ, omobj.localName))
+			logger.warn('Expected %s but found %s.  Are you sure this is open math',
+				 		 OMOBJ, omobj.localName)
 			return '\\Unknown{%s}' % (omobj)
 
 		oma = self.getChild(omobj, OMA)
 		handler = self.handleOMA
 		if oma == None or oma.localName != OMA:
-			if hasattr( self, 'handle' + omobj.childNodes[0].localName ):
-				handler = getattr( self, 'handle' + omobj.childNodes[0].localName )
+			if hasattr(self, 'handle' + omobj.childNodes[0].localName):
+				handler = getattr(self, 'handle' + omobj.childNodes[0].localName)
 				oma = omobj.childNodes[0]
 			else:
-				print('Expected %s but found %s' % (OMA, getattr( oma, 'localName' )))
+				logger.warn('Expected %s but found %s', OMA, getattr(oma, 'localName', None))
 				return '\\Unknown{%s}' % (oma)
 
 		return '$%s$' % handler(oma)
@@ -89,7 +89,7 @@ class OpenMath2Latex(object):
 		return None
 
 	def handleOMS(self, node):
-		'''
+		"""
 		Returns a tuple of the contentdictionary
 		add operator name.
 
@@ -98,15 +98,14 @@ class OpenMath2Latex(object):
 		(arith1, unary_minus)
 
 		e.g.
-		'''
+		"""
 
 		cd = node.getAttribute('cd')
 		name = node.getAttribute('name')
-
 		return (cd, name)
 
 	def handleOMA(self, node):
-		#First child should be the operator
+		# First child should be the operator
 		children = node.childNodes
 
 		translator = None
@@ -125,7 +124,7 @@ class OpenMath2Latex(object):
 					content = cd[opname]
 
 				if content == None:
-					print('Unknown content for %s:%s' % (cdname, opname))
+					logger.warn('Unknown content for %s:%s', cdname, opname)
 					return '\\Unknowncontent{%s}{%s}' % (cdname, opname)
 
 				if isinstance(content, basestring):
@@ -150,7 +149,7 @@ class OpenMath2Latex(object):
 				continue
 
 		if not translator:
-			print('No operator found')
+			logger.warn('No operator found')
 			return '\\NoOperatorFound{%s}' % (node)
 
 		translatorArgs = []
@@ -167,22 +166,22 @@ class OpenMath2Latex(object):
 		return func(*args)
 
 	def handleOMF(self, node):
-		'''
+		"""
 		OMF has a dec attribute that contains
 		the value.  e.g. <OMF decimal="40000"/>
-		'''
+		"""
 		return node.getAttribute('dec')
 
 	def handleOMV(self, node):
-		'''
+		"""
 		OMV has a name attribute that contains
 		the variable name.  e.g. <OMV name="a"/>
-		'''
+		"""
 		return node.getAttribute('name')
 
 	def handleOMI(self, node):
-		'''
+		"""
 		OMI should have on child that is a text node
 		e.g. <OMI>4</OMI>
-		'''
+		"""
 		return node.firstChild.data
