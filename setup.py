@@ -46,8 +46,5 @@ setup(
 	entry_points=entry_points,
 	extras_require={
 		'test': TESTS_REQUIRE,
-	},
-	dependency_links=[
-		'git+https://github.com/NextThought/nti.nose_traceback_info.git#egg=nti.nose_traceback_info'
-	],
+	}
 )
