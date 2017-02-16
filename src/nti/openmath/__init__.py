@@ -79,9 +79,9 @@ class OpenMath2Latex(object):
         oma = self.getChild(omobj, OMA)
         handler = self.handleOMA
         if oma is None or oma.localName != OMA:
-            handler = 'handle' + omobj.childNodes[0].localName
-            if hasattr(self, handler):
-                handler = getattr(self, handler)
+            attrib = 'handle' + omobj.childNodes[0].localName
+            if hasattr(self, attrib):
+                handler = getattr(self, attrib)
                 oma = omobj.childNodes[0]
             else:
                 logger.warn('Expected %s but found %s',
