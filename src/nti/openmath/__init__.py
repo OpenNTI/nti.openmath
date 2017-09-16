@@ -4,10 +4,12 @@
 .. $Id$
 """
 
-from __future__ import unicode_literals, print_function, absolute_import, division
+from __future__ import print_function, absolute_import, division
 __docformat__ = "restructuredtext en"
 
 logger = __import__('logging').getLogger(__name__)
+
+import six
 
 from xml.dom.minidom import parseString
 
@@ -136,7 +138,7 @@ class OpenMath2Latex(object):
                     logger.warn('Unknown content for %s:%s', cdname, opname)
                     return '\\Unknowncontent{%s}{%s}' % (cdname, opname)
 
-                if isinstance(content, basestring):
+                if isinstance(content, six.string_types):
                     possibleArgs.append(content)
                     continue
 

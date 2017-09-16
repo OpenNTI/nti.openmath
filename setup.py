@@ -1,50 +1,55 @@
 import codecs
 from setuptools import setup, find_packages
 
-VERSION = '0.0.0'
-
 entry_points = {
+    'console_scripts': [
+    ],
 }
 
 TESTS_REQUIRE = [
-	'nose',
-	'nose-pudb',
-	'nose-timer',
-	'nose-progressive',
-	'nose2[coverage_plugin]',
-	'pyhamcrest',
-	'nose_traceback_info'
+    'nti.testing',
+    'zope.testrunner',
 ]
 
+
+def _read(fname):
+    with codecs.open(fname, encoding='utf-8') as f:
+        return f.read()
+
+
 setup(
-	name = 'nti.openmath',
-	version = VERSION,
-	author = 'Jason Madden',
-	author_email = 'jason@nextthought.com',
-	description = "Support for parsing openmath XML",
-	long_description = codecs.open('README.rst', encoding='utf-8').read(),
-	license = 'Proprietary',
-	keywords = 'Math parsing',
-	classifiers = [
-		'Intended Audience :: Developers',
-		'Natural Language :: English',
-		'Operating System :: OS Independent',
-		'Programming Language :: Python :: 2',
-		'Programming Language :: Python :: 2.7',
-		'Programming Language :: Python :: 3',
-		'Programming Language :: Python :: 3.3',
-		'Programming Language :: Python :: 3.4',
-		'Programming Language :: Python :: Implementation :: CPython',
-	],
-	packages=find_packages('src'),
-	package_dir={'': 'src'},
-	namespace_packages=['nti',],
-	tests_require=TESTS_REQUIRE,
-	install_requires=[
-		'setuptools',
-	],
-	entry_points=entry_points,
-	extras_require={
-		'test': TESTS_REQUIRE,
-	}
+    name='nti.openmath',
+    version=_read('version.txt').strip(),
+    author='Jason Madden',
+    author_email='jason@nextthought.com',
+    description="Support for parsing openmath XML",
+    long_description=(_read('README.rst') + '\n\n' + _read('CHANGES.rst')),
+    license='Apache',
+    keywords='math parsing',
+    classifiers=[
+        'Intended Audience :: Developers',
+        'Natural Language :: English',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: Implementation :: CPython',
+        'Programming Language :: Python :: Implementation :: PyPy',
+    ],
+    url="https://github.com/NextThought/nti.openmath",
+    zip_safe=True,
+    packages=find_packages('src'),
+    package_dir={'': 'src'},
+    include_package_data=True,
+    namespace_packages=['nti'],
+    tests_require=TESTS_REQUIRE,
+    install_requires=[
+        'setuptools',
+        'six',
+    ],
+    extras_require={
+        'test': TESTS_REQUIRE,
+    },
+    entry_points=entry_points,
 )
