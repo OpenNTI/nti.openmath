@@ -4,13 +4,13 @@
 .. $Id$
 """
 
-from __future__ import print_function, absolute_import, division
-__docformat__ = "restructuredtext en"
-
-logger = __import__('logging').getLogger(__name__)
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 import six
 
+from xml.dom.minidom import Text
 from xml.dom.minidom import parseString
 
 OMS = 'OMS'
@@ -19,6 +19,8 @@ OMV = 'OMV'
 OMI = 'OMI'
 OMF = 'OMF'
 OMOBJ = 'OMOBJ'
+
+logger = __import__('logging').getLogger(__name__)
 
 
 def binaryOperator(op, arg1, arg2):
@@ -62,36 +64,45 @@ nums1 = {'pi': '\\pi'}
 
 class OpenMath2Latex(object):
 
-    contentDicts = {}
-
-    def __init__(self):
-        self.contentDicts['nums1'] = nums1
-        self.contentDicts['arith1'] = arith1
+    contentDicts = {
+        'nums1': nums1,
+        'arith1': arith1
+    }
 
     def translate(self, openMathXML):
         dom = parseString(openMathXML)
-
+        
         omobj = dom.firstChild
-
         if omobj.localName != OMOBJ:
             logger.warn('Expected %s but found %s.  Are you sure this is open math',
                         OMOBJ, omobj.localName)
-            return '\\Unknown{%s}' % (omobj)
+            return '\\Unknown{%s}' % omobj.localName
 
         oma = self.getChild(omobj, OMA)
         handler = self.handleOMA
         if oma is None or oma.localName != OMA:
-            attrib = 'handle' + omobj.childNodes[0].localName
-            if hasattr(self, attrib):
-                handler = getattr(self, attrib)
-                oma = omobj.childNodes[0]
+            # find first non text node
+            i = 0
+            while   i < len(omobj.childNodes) \
+                and isinstance(omobj.childNodes[i], Text):
+                i += 1
+            if i < len(omobj.childNodes):
+                # process first node found
+                attrib = 'handle' + omobj.childNodes[i].localName
+                if hasattr(self, attrib):
+                    handler = getattr(self, attrib)
+                    oma = omobj.childNodes[i]
+                else:
+                    oma = omobj.childNodes[i].localName
+                    logger.warn('Expected %s but found %s',
+                                OMA, oma)
+                    return '\\Unknown{%s}' % oma
             else:
-                logger.warn('Expected %s but found %s',
-                            OMA,
-                            getattr(oma, 'localName',None))
-                return '\\Unknown{%s}' % (oma)
+                logger.warn('No open math element found')
+                return None
 
-        return '$%s$' % handler(oma)
+        result = '$%s$' % handler(oma)
+        return result
 
     def getChild(self, node, childName):
         for child in node.childNodes or ():
@@ -130,10 +141,7 @@ class OpenMath2Latex(object):
                 cdname, opname = self.handleOMS(child)
                 cd = self.contentDicts[cdname]
 
-                content = None
-                if cd:
-                    content = cd[opname]
-
+                content = cd.get(opname) if cd else None
                 if content is None:
                     logger.warn('Unknown content for %s:%s', cdname, opname)
                     return '\\Unknowncontent{%s}{%s}' % (cdname, opname)
@@ -157,11 +165,11 @@ class OpenMath2Latex(object):
             elif child.localName == OMF:
                 possibleArgs.append(self.handleOMF(child))
             else:
-                continue
+                logger.warn('Unhandle element %s', child.localName)
 
         if not translator:
             logger.warn('No operator found')
-            return '\\NoOperatorFound{%s}' % (node)
+            return '\\NoOperatorFound{%s}' % node.localName
 
         translatorArgs = []
 

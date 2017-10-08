@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function, absolute_import, division
-__docformat__ = "restructuredtext en"
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
 
 # disable: accessing protected members, too many methods
 # pylint: disable=W0212,R0904
 
 from hamcrest import is_
+from hamcrest import none
 from hamcrest import assert_that
 
 import os
@@ -73,13 +75,60 @@ class TestAssessment(unittest.TestCase):
     def test_float(self):
         result = self.translateOpenMath('floatmath.xml')
         assert_that(result, is_('$40000.00 + 3$'))
+    
+    def test_no_omobj(self):
+        result = self.translator.translate('<noombbj xmlns="http://www.openmath.org/OpenMath" />')
+        assert_that(result, is_('\\Unknown{noombbj}'))
+
+    def test_no_oma(self):
+        content = """
+            <OMOBJ xmlns="http://www.openmath.org/OpenMath" version="2.0" cdbase="http://www.openmath.org/cd">
+            </OMOBJ>
+        """
+        result = self.translator.translate(content)
+        assert_that(result, is_(none()))
+        
+        content = """
+            <OMOBJ xmlns="http://www.openmath.org/OpenMath" version="2.0" cdbase="http://www.openmath.org/cd">
+                <OMI>3</OMI>
+            </OMOBJ>
+        """
+        result = self.translator.translate(content)
+        assert_that(result, is_('$3$'))
+        
+        content = """
+            <OMOBJ xmlns="http://www.openmath.org/OpenMath" version="2.0" cdbase="http://www.openmath.org/cd">
+                <NoOBJ />
+            </OMOBJ>
+        """
+        result = self.translator.translate(content)
+        assert_that(result, is_('\\Unknown{NoOBJ}'))
+
+    def test_unknown_content(self):
+        content = """
+            <OMOBJ xmlns="http://www.openmath.org/OpenMath" version="2.0" cdbase="http://www.openmath.org/cd">
+                <OMA>
+                    <OMS cd="arith1" name="xxxx"/>
+                </OMA>
+            </OMOBJ>
+        """
+        result = self.translator.translate(content)
+        assert_that(result, is_('$\\Unknowncontent{arith1}{xxxx}$'))
+        
+    def test_no_operator(self):
+        content = """
+            <OMOBJ xmlns="http://www.openmath.org/OpenMath" version="2.0" cdbase="http://www.openmath.org/cd">
+                <OMA>
+                    <NoOp />
+                    <NoOp />
+                </OMA>
+            </OMOBJ>
+        """
+        result = self.translator.translate(content)
+        assert_that(result, is_('$\\NoOperatorFound{OMA}$'))
 
     def translateOpenMath(self, file_name):
-        xml = open(os.path.join(os.path.dirname(__file__),
-                                'openmath',
-                                file_name))
-        try:
+        path = os.path.join(os.path.dirname(__file__), 'openmath', file_name)
+        with open(path) as xml:
             result = self.translator.translate(xml.read())
-        finally:
-            xml.close()
         return result
