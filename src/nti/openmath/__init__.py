@@ -74,8 +74,8 @@ class OpenMath2Latex(object):
         
         omobj = dom.firstChild
         if omobj.localName != OMOBJ:
-            logger.warn('Expected %s but found %s.  Are you sure this is open math',
-                        OMOBJ, omobj.localName)
+            logger.warning('Expected %s but found %s.  Are you sure this is open math',
+                           OMOBJ, omobj.localName)
             return '\\Unknown{%s}' % omobj.localName
 
         oma = self.getChild(omobj, OMA)
@@ -94,11 +94,11 @@ class OpenMath2Latex(object):
                     oma = omobj.childNodes[i]
                 else:
                     oma = omobj.childNodes[i].localName
-                    logger.warn('Expected %s but found %s',
-                                OMA, oma)
+                    logger.warning('Expected %s but found %s',
+                                   OMA, oma)
                     return '\\Unknown{%s}' % oma
             else:
-                logger.warn('No open math element found')
+                logger.warning('No open math element found')
                 return None
 
         result = '$%s$' % handler(oma)
@@ -143,7 +143,7 @@ class OpenMath2Latex(object):
 
                 content = cd.get(opname) if cd else None
                 if content is None:
-                    logger.warn('Unknown content for %s:%s', cdname, opname)
+                    logger.warning('Unknown content for %s:%s', cdname, opname)
                     return '\\Unknowncontent{%s}{%s}' % (cdname, opname)
 
                 if isinstance(content, six.string_types):
@@ -165,10 +165,10 @@ class OpenMath2Latex(object):
             elif child.localName == OMF:
                 possibleArgs.append(self.handleOMF(child))
             else:
-                logger.warn('Unhandle element %s', child.localName)
+                logger.warning('Unhandle element %s', child.localName)
 
         if not translator:
-            logger.warn('No operator found')
+            logger.warning('No operator found')
             return '\\NoOperatorFound{%s}' % node.localName
 
         translatorArgs = []
